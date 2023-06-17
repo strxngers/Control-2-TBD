@@ -23,3 +23,25 @@ CREATE TABLE zc_500m AS(
 -- Se elimina la tabla si existe una con este nombre anteriormente
 DROP TABLE IF EXISTS comunas_ptje_mini;
 
+-- Creación tabla de porcentajes por comuna en cuanto a las áreas de censales en las 
+-- cuales habia una distancia mayor a 500 metros
+-- Para calcular el porcentaje de cada comuna debemos obtener el total de zonas censales
+-- y luego el total de zonas censales por comuna
+-- Y finalmente para obtener el porcentaje se debe dividir 
+-- el total de zonas censales por comuna en el total de zonas censales y se multiplica por 100
+CREATE TABLE comunas_ptje_mini AS
+SELECT z1.comuna, z1.nom_comuna,
+       ROUND((z1.total * 100.0 / z2.total),2) AS porcentaje
+FROM (
+    SELECT z.comuna, z.nom_comuna, COUNT(z.id) AS total
+    FROM zc_500m AS z
+    GROUP BY z.comuna, z.nom_comuna
+) AS z1
+JOIN (
+    SELECT z.comuna, z.nom_comuna, COUNT(z.id) AS total
+    FROM zonas_censales_gs AS z
+    GROUP BY z.comuna, z.nom_comuna
+) AS z2 ON z1.comuna = z2.comuna
+        AND z1.nom_comuna = z2.nom_comuna;
+
+
